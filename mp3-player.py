@@ -35,6 +35,7 @@ class Player():
         # Create open URL button
         self.url_button = tk.Button(root, text='Open URL', command=self.open_url)
         self.url_button.pack(side=tk.LEFT, padx=5, pady=5)
+
     # Disable slider updates while scrubbing
     def cancel_job(self, event=None):
         if self.job is not None:
@@ -66,9 +67,10 @@ class Player():
 
     def stop(self):
         self.player.stop()
+
     def set_position(self, event=None):
         self.player.set_position(float(self.pos_slider.get()) / 100)
-        self.job = self.root.after(1000, self.update_sliders) # Re-enable progress bar updates
+        self.job = self.root.after(1000, self.update_sliders)  # Re-enable progress bar updates
 
     def set_volume(self, volume):
         self.player.audio_set_volume(int(volume))
