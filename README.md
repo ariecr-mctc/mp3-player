@@ -1,2 +1,14 @@
 # mp3-player
-Basic MP3 Player Written in Python
+Basic Audio Player Written in Python
+Depends on libvlc
+
+# TODO
+- Improve UI
+
+# Stretch Goals
+- Add album art preview
+- Add m3u8 playlist support
+- Add yt-dlp integration
+
+# Credits
+https://codeloop.org/how-to-build-media-player-in-python-tkinter/
