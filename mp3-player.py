@@ -23,19 +23,15 @@ class Player():
         self.pos = tk.DoubleVar()
         self.pos_slider = tk.Scale(root, from_=0, to=100, orient="horizontal", variable = self.pos, command=self.set_position)
         self.pos_slider.pack(fill=tk.X, padx=10, pady=5)
-        # Create browse button
-        self.browse_button = tk.Button(root, text="Open File", command=self.browse_file)
-        self.browse_button.pack(side=tk.LEFT, padx=5, pady=5)
-        # Update sliders
+        # Create open file button
+        self.file_button = tk.Button(root, text="Open File", command=self.open_file)
+        self.file_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    def browse_file(self):
+    def open_file(self):
         file_path = tk.filedialog.askopenfilename()
         if file_path:
-            self.load_file(file_path)
-
-    def load_file(self, file_path):
-        self.player.set_media(self.instance.media_new(file_path))
-        self.player.play()
+            self.player.set_media(self.instance.media_new(file_path))
+            self.player.play()
 
     def pause(self):
         self.player.pause()
