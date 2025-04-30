@@ -1,9 +1,11 @@
 # mp3-player
-Basic Audio Player Written in Python
-Depends on libvlc
+Basic Audio Player Written in Python  
+Depends on libvlc and yt-dlp
 
 # TODO
 - Improve UI
+- Add media display
+- Add indicator that yt-dlp is running
 
 # Stretch Goals
 - Add album art preview

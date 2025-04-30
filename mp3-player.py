@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, simpledialog
 import vlc
+import yt_dlp
+
 
 class Player():
     def __init__(self, tk_root):
@@ -21,16 +23,30 @@ class Player():
         self.volume_slider.pack(side=tk.LEFT, padx=5, pady=5)
         # Create position slider
         self.pos = tk.DoubleVar()
-        self.pos_slider = tk.Scale(root, from_=0, to=100, orient="horizontal", variable = self.pos, command=self.set_position)
+        self.pos_slider = tk.Scale(root, from_=0, to=100, orient="horizontal", variable=self.pos, command=self.set_position)
         self.pos_slider.pack(fill=tk.X, padx=10, pady=5)
         # Create open file button
         self.file_button = tk.Button(root, text="Open File", command=self.open_file)
         self.file_button.pack(side=tk.LEFT, padx=5, pady=5)
+        # Create open URL button
+        self.url_button = tk.Button(root, text="Open URL", command=self.open_url)
+        self.url_button.pack(side=tk.LEFT, padx=5, pady=5)
 
     def open_file(self):
         file_path = tk.filedialog.askopenfilename()
         if file_path:
             self.player.set_media(self.instance.media_new(file_path))
+            self.player.play()
+
+    def open_url(self):
+        url = tk.simpledialog.askstring("Open URL", "Enter the URL to play:")
+        # Get raw audio URL with yt-dlp. May not work if YouTube breaks something.
+        ydl_opts = {'format': 'bestaudio'}
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            song_info = ydl.extract_info(url, download=False)
+        if song_info:
+            real_url = song_info["url"]
+            self.player.set_media(self.instance.media_new(real_url))
             self.player.play()
 
     def pause(self):
@@ -51,6 +67,8 @@ class Player():
     def update_sliders(self):
         self.pos.set(float(self.player.get_position() * 100))
         self.root.after(1000, self.update_sliders)
+
+
 # player = Player(sys.argv[0])
 # player.vlc.play()
 
