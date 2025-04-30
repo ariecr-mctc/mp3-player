@@ -1,16 +1,26 @@
-# mp3-player
-Basic Audio Player Written in Python  
-Depends on libvlc and yt-dlp
+mp3-player
+=========
+Basic Audio Player Written in Python using Tk, libvlc and yt-dlp
 
-# TODO
+Installation
+--------------
+```
+git clone https://github.com/ariecr-mctc/mp3-player.git
+cd mp3-player
+pip install -r requirements.txt
+```
+
+TODO
+--------------
 - Improve UI
 - Add media display
 - Add indicator that yt-dlp is running
 
-# Stretch Goals
+Stretch Goals
+--------------
 - Add album art preview
 - Add m3u8 playlist support
-- Add yt-dlp integration
 
-# Credits
+Credits
+--------------
 https://codeloop.org/how-to-build-media-player-in-python-tkinter/
