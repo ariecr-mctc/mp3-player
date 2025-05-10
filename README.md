@@ -13,7 +13,6 @@ pip install -r requirements.txt
 
 TODO
 --------------
-- Add file saving support
 - Add playlist support
 
 Stretch Goals
