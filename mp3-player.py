@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from threading import Thread
 import tkinter as tk
 from tkinter import filedialog, simpledialog
 import vlc
@@ -85,7 +86,7 @@ class PlayerGui:
         self.url_button = tk.Button(self.root, text='Open URL', command=self.open_url)
         self.url_button.grid(row=1, column=1, sticky='nsew', padx=2, pady=2)
         # Create save button
-        self.save_button = tk.Button(self.root, text='Save File', command=self.save_file)
+        self.save_button = tk.Button(self.root, text='Save As', command=self.save_file)
         self.save_button.grid(row=2, column=0, columnspan=2, sticky='ns', padx=2, pady=2)
         # Create volume slider
         self.volume_slider = tk.Scale(self.root, from_=100, to=0, orient='vertical', command=self.player.set_volume)
@@ -135,7 +136,8 @@ class PlayerGui:
 
     def save_file(self):
         file_path = tk.filedialog.asksaveasfilename()
-        self.player.save(file_path)
+        save_thread = Thread(target=self.player.save, args=(file_path,))
+        save_thread.start()
 
     def set_position(self, event=None):
         self.player.set_position(float(self.pos_slider.get()) / 100)
