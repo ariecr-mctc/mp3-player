@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import time
 import tkinter as tk
 from tkinter import filedialog, simpledialog
 import vlc
@@ -14,6 +13,7 @@ class Player:
         # Initialize YT-DLP before usage to reduce loading times
         ydl_opts = {'format': 'bestaudio'}
         self.ydl = yt_dlp.YoutubeDL(ydl_opts)
+        self.ydl_url = None
 
     def get_position(self):
         return self.mplayer.get_position()
@@ -23,6 +23,7 @@ class Player:
         title = None
         if uri.startswith('http'):
             # Get raw audio URL and metadata with yt-dlp. May not work if YouTube breaks something.
+            self.ydl_url = uri
             song_info = self.ydl.extract_info(uri, download=False)
             if song_info:
                 media = self.instance.media_new(song_info['url'])
@@ -46,6 +47,11 @@ class Player:
     def play(self):
         self.mplayer.play()
 
+    def save(self, path):
+        ydl_opts = {'format': 'bestaudio', 'outtmpl': f'{path}.%(ext)s'}
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download(self.ydl_url)
+
     def stop(self):
         self.mplayer.stop()
 
@@ -61,6 +67,8 @@ class PlayerGui:
         # Initialize objects
         self.root = tk_root
         self.root.title('Audio Player')
+        self.root.columnconfigure(3, weight=1)
+        self.root.minsize(600, 100)
         self.player = player
         # Update sliders
         self.job = self.root.after(100, self.update_sliders)
@@ -74,10 +82,19 @@ class PlayerGui:
         # Create stop button
         self.stop_button = tk.Button(self.root, text='Stop', command=self.stop)
         self.stop_button.grid(row=0, column=1)
+        # Create open file button
+        self.file_button = tk.Button(self.root, text='Open File', command=self.open_file)
+        self.file_button.grid(row=1, column=0)
+        # Create open URL button
+        self.url_button = tk.Button(self.root, text='Open URL', command=self.open_url)
+        self.url_button.grid(row=1, column=1)
+        # Create save button
+        self.save_button = tk.Button(self.root, text='Save File', command=self.save_file)
+        self.save_button.grid(row=2, column=0, columnspan=2)
         # Create volume slider
         self.volume_slider = tk.Scale(self.root, from_=100, to=0, orient='vertical', command=self.player.set_volume)
         self.volume_slider.set(100)
-        self.volume_slider.grid(row=0, column=2, rowspan=2)
+        self.volume_slider.grid(row=0, column=2, rowspan=3)
         self.volume_label = tk.Label(self.root, text='Volume')
         self.volume_label.grid(row=3, column=2, sticky='n')
         # Create position slider
@@ -85,14 +102,6 @@ class PlayerGui:
         self.pos_slider.bind('<ButtonPress-1>', self.cancel_job)  # Avoid slider position updating while scrubbing
         self.pos_slider.bind('<ButtonRelease-1>', self.set_position)  # Avoid constant audio clipping when scrubbing
         self.pos_slider.grid(row=1, column=3, sticky='nsew')
-        # Create open file button
-        self.file_button = tk.Button(self.root, text='Open File', command=self.open_file)
-        self.file_button.grid(row=1, column=0)
-        # Create open URL button
-        self.url_button = tk.Button(self.root, text='Open URL', command=self.open_url)
-        self.url_button.grid(row=1, column=1)
-        self.root.columnconfigure(3, weight=1)
-        self.root.minsize(600, 100)
 
     # Disable slider updates while scrubbing
     def cancel_job(self, event=None):
@@ -123,6 +132,10 @@ class PlayerGui:
             self.now_playing_text.set('YT-DLP is fetching media, please wait...')
             self.root.update()
             self.open_media(url)
+
+    def save_file(self):
+        file_path = tk.filedialog.asksaveasfilename()
+        self.player.save(file_path)
 
     def set_position(self, event=None):
         self.player.set_position(float(self.pos_slider.get()) / 100)
