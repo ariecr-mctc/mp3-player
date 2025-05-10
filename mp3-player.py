@@ -72,36 +72,36 @@ class PlayerGui:
         self.player = player
         # Update sliders
         self.job = self.root.after(100, self.update_sliders)
-        # Create media display
-        self.now_playing_text = tk.StringVar(value='Now Playing: N/A')
-        self.now_playing = tk.Label(self.root, textvariable=self.now_playing_text)
-        self.now_playing.grid(row=0, column=3, sticky='nsew')
         # Create play/pause button
         self.play_button = tk.Button(self.root, text='Play/Pause', command=self.player.pause)
-        self.play_button.grid(row=0, column=0)
+        self.play_button.grid(row=0, column=0, sticky='nsew', padx=2, pady=2)
         # Create stop button
         self.stop_button = tk.Button(self.root, text='Stop', command=self.stop)
-        self.stop_button.grid(row=0, column=1)
+        self.stop_button.grid(row=0, column=1, sticky='nsew', padx=2, pady=2)
         # Create open file button
         self.file_button = tk.Button(self.root, text='Open File', command=self.open_file)
-        self.file_button.grid(row=1, column=0)
+        self.file_button.grid(row=1, column=0, sticky='nsew', padx=2, pady=2)
         # Create open URL button
         self.url_button = tk.Button(self.root, text='Open URL', command=self.open_url)
-        self.url_button.grid(row=1, column=1)
+        self.url_button.grid(row=1, column=1, sticky='nsew', padx=2, pady=2)
         # Create save button
         self.save_button = tk.Button(self.root, text='Save File', command=self.save_file)
-        self.save_button.grid(row=2, column=0, columnspan=2)
+        self.save_button.grid(row=2, column=0, columnspan=2, sticky='ns', padx=2, pady=2)
         # Create volume slider
         self.volume_slider = tk.Scale(self.root, from_=100, to=0, orient='vertical', command=self.player.set_volume)
         self.volume_slider.set(100)
         self.volume_slider.grid(row=0, column=2, rowspan=3)
         self.volume_label = tk.Label(self.root, text='Volume')
         self.volume_label.grid(row=3, column=2, sticky='n')
+        # Create media display
+        self.now_playing_text = tk.StringVar(value='Now Playing: N/A')
+        self.now_playing = tk.Label(self.root, textvariable=self.now_playing_text)
+        self.now_playing.grid(row=1, column=3, sticky='nsew')
         # Create position slider
         self.pos_slider = tk.Scale(self.root, from_=0, to=100, orient='horizontal', showvalue=False)
         self.pos_slider.bind('<ButtonPress-1>', self.cancel_job)  # Avoid slider position updating while scrubbing
         self.pos_slider.bind('<ButtonRelease-1>', self.set_position)  # Avoid constant audio clipping when scrubbing
-        self.pos_slider.grid(row=1, column=3, sticky='nsew')
+        self.pos_slider.grid(row=2, column=3, sticky='nsew', padx=10)
 
     # Disable slider updates while scrubbing
     def cancel_job(self, event=None):
