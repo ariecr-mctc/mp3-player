@@ -49,7 +49,17 @@ class Player:
         self.mplayer.play()
 
     def save(self, path):
-        ydl_opts = {'format': 'bestaudio', 'outtmpl': f'{path}.%(ext)s'}
+        ydl_opts = {'format': 'bestaudio',
+                    # Embed metadata
+                    'postprocessors': [{
+                        'key': 'FFmpegMetadata',
+                        'add_chapters': True,
+                        'add_metadata': True,
+                        'add_infojson': 'if_exists'
+                    }],
+                    'overwrites': True,
+                    # Output template
+                    'outtmpl': f'{path}.%(ext)s'}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download(self.ydl_url)
 
