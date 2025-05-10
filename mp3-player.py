@@ -11,27 +11,34 @@ class Player():
         self.instance = vlc.Instance()
         self.mplayer = self.instance.media_player_new()
         self.events = self.mplayer.event_manager()
+        # Initialize YT-DLP before usage to reduce loading times
+        ydl_opts = {'format': 'bestaudio'}
+        self.ydl = yt_dlp.YoutubeDL(ydl_opts)
 
     def get_position(self):
         return self.mplayer.get_position()
 
     def open(self, uri):
+        media = None
+        title = None
         if uri.startswith('http'):
-            # Get raw audio URL with yt-dlp. May not work if YouTube breaks something.
-            ydl_opts = {'format': 'bestaudio'}
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                song_info = ydl.extract_info(uri, download=False)
+            # Get raw audio URL and metadata with yt-dlp. May not work if YouTube breaks something.
+            song_info = self.ydl.extract_info(uri, download=False)
             if song_info:
-                uri = song_info['url']
-        # Parse metadata
-        media = self.instance.media_new(uri)
-        vlc.libvlc_media_parse_with_options(media, vlc.MediaParseFlag(network=True), 5000)
-        # Above method is asynchronous, wait until done
-        while not vlc.libvlc_media_get_parsed_status(media):
-            continue
+                media = self.instance.media_new(song_info['url'])
+                title = song_info['title']
+        else:
+            # Parse metadata
+            media = self.instance.media_new(uri)
+            vlc.libvlc_media_parse_with_options(media, vlc.MediaParseFlag(network=True), 5000)
+            # Above method is asynchronous, wait until done
+            while not vlc.libvlc_media_get_parsed_status(media):
+                continue
+            title = media.get_meta(vlc.Meta.Title)
+        # Play the media with VLC
         self.mplayer.set_media(media)
         self.mplayer.play()
-        return media.get_meta(vlc.Meta.Title)
+        return title
 
     def pause(self):
         self.mplayer.pause()
@@ -95,21 +102,25 @@ class PlayerGui():
 
     def open_file(self):
         file_path = tk.filedialog.askopenfilename()
-        self.open_media(file_path)
+        if file_path:
+            self.open_media(file_path)
 
     def open_media(self, url):
-        if url:
-            title = self.player.open(url)
-            if title is not None:
-                self.now_playing_text.set('Now Playing: ' + title)
-            else:
-                self.now_playing_text.set('Error: Media info not found.')
+        title = self.player.open(url)
+        # Set now nlaying text, or a fallback message in case of errors
+        if title is not None:
+            self.now_playing_text.set('Now Playing: ' + title)
+        else:
+            self.now_playing_text.set('Error: Media info not found.')
 
     def open_url(self):
         url = tk.simpledialog.askstring('Open URL', 'Enter the URL to play:')
-        self.now_playing_text.set('YT-DLP is fetching URL, please wait...')
-        self.root.update()
-        self.open_media(url)
+        if url:
+            self.player.stop()
+            # Set now playing text to be more descriptive
+            self.now_playing_text.set('YT-DLP is fetching media, please wait...')
+            self.root.update()
+            self.open_media(url)
 
     def set_position(self, event=None):
         self.player.set_position(float(self.pos_slider.get()) / 100)
