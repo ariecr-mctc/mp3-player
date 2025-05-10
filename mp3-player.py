@@ -107,6 +107,8 @@ class PlayerGui():
 
     def open_media(self, url):
         title = self.player.open(url)
+        # Fix volume not applying on media start
+        self.player.set_volume(self.volume_slider.get())
         # Set now nlaying text, or a fallback message in case of errors
         if title is not None:
             self.now_playing_text.set('Now Playing: ' + title)
