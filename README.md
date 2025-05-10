@@ -13,7 +13,6 @@ pip install -r requirements.txt
 
 TODO
 --------------
-- Add medis display (now playing)
 - Add file saving support
 - Add playlist support
 
