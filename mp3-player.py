@@ -6,7 +6,7 @@ import vlc
 import yt_dlp
 
 
-class Player():
+class Player:
     def __init__(self):
         self.instance = vlc.Instance()
         self.mplayer = self.instance.media_player_new()
@@ -56,7 +56,7 @@ class Player():
         self.mplayer.audio_set_volume(int(volume))
 
 
-class PlayerGui():
+class PlayerGui:
     def __init__(self, tk_root, player=Player()):
         # Initialize objects
         self.root = tk_root
