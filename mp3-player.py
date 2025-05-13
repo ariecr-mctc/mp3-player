@@ -81,6 +81,7 @@ class PlayerGui:
         self.root.columnconfigure(3, weight=1)
         self.root.minsize(600, 100)
         self.player = player
+        self.player.events.event_attach(vlc.EventType.MediaPlayerEndReached, self.clear_current)
         # Update sliders
         self.job = self.root.after(100, self.update_sliders)
         # Create play/pause button
@@ -120,6 +121,9 @@ class PlayerGui:
             self.root.after_cancel(self.job)
             self.job = None
 
+    def clear_current(self, event=None):
+        self.now_playing_text.set('Now Playing: N/A')
+
     def open_file(self):
         file_path = tk.filedialog.askopenfilename()
         if file_path:
@@ -155,7 +159,7 @@ class PlayerGui:
 
     def stop(self):
         self.player.stop()
-        self.now_playing_text.set('Now Playing: N/A')
+        self.clear_current()
 
     def update_sliders(self):
         self.pos_slider.set(self.player.get_position() * 100)
