@@ -9,7 +9,8 @@ import yt_dlp
 class Player:
     def __init__(self):
         self.instance = vlc.Instance()
-        self.mplayer = self.instance.media_player_new()
+        self.mlistplayer = self.instance.media_list_player_new()
+        self.mplayer = self.mlistplayer.get_media_player()
         self.events = self.mplayer.event_manager()
         # Initialize YT-DLP before usage to reduce loading times
         ydl_opts = {'format': 'bestaudio'}
@@ -37,9 +38,11 @@ class Player:
             while not vlc.libvlc_media_get_parsed_status(media):
                 continue
             title = media.get_meta(vlc.Meta.Title)
-        # Play the media with VLC
-        self.mplayer.set_media(media)
-        self.mplayer.play()
+        # Create MediaList and play the media with VLC
+        mlist = self.instance.media_list_new()
+        mlist.add_media(media)
+        self.mlistplayer.set_media_list(mlist)
+        self.mlistplayer.play_item(media)
         return title
 
     def pause(self):
