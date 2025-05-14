@@ -12,10 +12,12 @@ class Player:
         self.mlistplayer = self.instance.media_list_player_new()
         self.mplayer = self.mlistplayer.get_media_player()
         self.events = self.mplayer.event_manager()
-        # Initialize YT-DLP before usage to reduce loading times
-        ydl_opts = {'format': 'bestaudio'}
+        # Initialize YT-DLP before usage to slightly reduce loading times
+        # Opts explanation: Get the best audio, don't actually download playlist
+        ydl_opts = {'format': 'bestaudio', 'extract_flat': 'in_playlist'}
         self.ydl = yt_dlp.YoutubeDL(ydl_opts)
         self.ydl_url = None
+        self.ydl_thread = None
 
     def get_position(self):
         return self.mplayer.get_position()
@@ -28,12 +30,17 @@ class Player:
             yt_info = self.ydl.extract_info(uri, download=False)
             if yt_info:
                 try:  # Try extracting playlist
-                    songs = yt_info['entries']
+                    song_list = yt_info['entries']
+                    # Download the first item so we have something to give to VLC
+                    yt_info = self.ydl.extract_info(song_list[0]['url'], download=False)
+                    media = self.instance.media_new(yt_info['url'])
+                    media.set_meta(vlc.Meta.Title, yt_info['title'])
+                    mlist.add_media(media)
+                    self.ydl_thread = Thread(target=self._ydl_background_thread, args=(mlist, song_list, self.mlistplayer))
+                    self.ydl_thread.start()
                 except KeyError:  # Single song
-                    songs = [yt_info]
-                for song in songs:  # Parse metadata from yt-dlp
-                    media = self.instance.media_new(song['url'])
-                    media.set_meta(vlc.Meta.Title, song['title'])
+                    media = self.instance.media_new(yt_info['url'])
+                    media.set_meta(vlc.Meta.Title, yt_info['title'])
                     mlist.add_media(media)
         else:
             # Parse metadata
@@ -45,7 +52,7 @@ class Player:
         self.mlistplayer.play()
 
     def pause(self):
-        self.mplayer.pause()
+        self.mlistplayer.pause()
 
     def save(self, path):
         ydl_opts = {'format': 'bestaudio',
@@ -70,6 +77,18 @@ class Player:
 
     def set_volume(self, volume):
         self.mplayer.audio_set_volume(int(volume))
+
+    def _ydl_background_thread(self, mlist, song_list, mlistplayer):
+        ydl_opts = {'format': 'bestaudio'}
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            for song in song_list[1:50]:  # Skip first song, we already have it. Also limit to 50 songs to not get temp banned by YT.
+                url = song['url']  # Extract each URL from the playlist one at a time
+                yt_info = self.ydl.extract_info(url, download=False)
+                # Get real media URL and feed it to VLC
+                media = self.instance.media_new(yt_info['url'])
+                media.set_meta(vlc.Meta.Title, yt_info['title'])
+                mlist.add_media(media)
+
 
 
 class PlayerGui:
