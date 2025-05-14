@@ -31,7 +31,7 @@ class Player:
                     songs = yt_info['entries']
                 except KeyError:  # Single song
                     songs = [yt_info]
-                for song in songs:
+                for song in songs:  # Parse metadata from yt-dlp
                     media = self.instance.media_new(song['url'])
                     media.set_meta(vlc.Meta.Title, song['title'])
                     mlist.add_media(media)
