@@ -112,32 +112,29 @@ class PlayerGui:
         self.root = tk_root
         self.root.title('Audio Player')
         self.root.columnconfigure(3, weight=1)
-        self.root.minsize(750, 100)
+        self.root.columnconfigure(4, weight=1)
+        self.root.columnconfigure(5, weight=1)
+        self.root.columnconfigure(6, weight=1)
+        self.root.minsize(720, 120)
         self.player = player
         self.player.events.event_attach(vlc.EventType.MediaPlayerEndReached, self.clear_current)
         self.player.events.event_attach(vlc.EventType.MediaPlayerPlaying, self.set_needs_update)
         # Update media info
         self.media_needs_update = False
         self.job = self.root.after(100, self.update_media_info)
-        # Create play/pause button
-        self.play_button = tk.Button(self.root, text='Play/Pause', command=self.player.pause)
-        self.play_button.grid(row=0, column=0, sticky='nsew', padx=2, pady=2)
-        # Create stop button
-        self.stop_button = tk.Button(self.root, text='Stop', command=self.stop)
-        self.stop_button.grid(row=0, column=1, sticky='nsew', padx=2, pady=2)
-        # Create open file button
-        self.file_button = tk.Button(self.root, text='Open File', command=self.open_file)
-        self.file_button.grid(row=1, column=0, sticky='nsew', padx=2, pady=2)
-        # Create open URL button
-        self.url_button = tk.Button(self.root, text='Open URL', command=self.open_url)
-        self.url_button.grid(row=1, column=1, sticky='nsew', padx=2, pady=2)
         # Create save button
         self.save_button = tk.Button(self.root, text='Save As', command=self.save_media)
-        self.save_button.grid(row=2, column=0, columnspan=2, sticky='ns', padx=2, pady=2)
+        self.save_button.grid(row=1, column=0, columnspan=2, sticky='nsew', padx=(16, 2), pady=(15, 2))
+        # Create open file button
+        self.file_button = tk.Button(self.root, text='Open File', command=self.open_file)
+        self.file_button.grid(row=2, column=0, sticky='nsew', padx=(16, 2), pady=(2, 1))
+        # Create open URL button
+        self.url_button = tk.Button(self.root, text='Open URL', command=self.open_url)
+        self.url_button.grid(row=2, column=1, sticky='nsew', padx=2, pady=(2, 1))
         # Create volume slider
         self.volume_slider = tk.Scale(self.root, from_=100, to=0, orient='vertical', command=self.player.set_volume)
         self.volume_slider.set(100)
-        self.volume_slider.grid(row=0, column=2, rowspan=3)
+        self.volume_slider.grid(row=0, column=2, rowspan=3, pady=(15, 0))
         self.volume_label = tk.Label(self.root, text='Volume')
         self.volume_label.grid(row=3, column=2, sticky='n')
         # Create media display
@@ -148,11 +145,19 @@ class PlayerGui:
         self.pos_slider = tk.Scale(self.root, from_=0, to=100, orient='horizontal', showvalue=False)
         self.pos_slider.bind('<ButtonPress-1>', self.cancel_job)  # Avoid slider position updating while scrubbing
         self.pos_slider.bind('<ButtonRelease-1>', self.set_position)  # Avoid constant audio clipping when scrubbing
-        self.pos_slider.grid(row=2, column=3, columnspan=4, sticky='nsew', padx=10)
+        self.pos_slider.grid(row=2, column=3, columnspan=4, sticky='new', padx=(12, 15))
+        # Create previous button
         self.prev_button = tk.Button(self.root, text='<==', command=self.player.prev)
-        self.prev_button.grid(row=3, column=3, sticky='nsw', padx=2, pady=2)
+        self.prev_button.grid(row=2, column=3, sticky='sw', padx=(13, 0), pady=(30, 1))
+        # Create play/pause button
+        self.play_button = tk.Button(self.root, text=u'Play/Pause', command=self.player.pause)
+        self.play_button.grid(row=2, column=4, sticky='se', padx=2, pady=(2, 1))
+        # Create stop button
+        self.stop_button = tk.Button(self.root, text='Stop', command=self.stop)
+        self.stop_button.grid(row=2, column=5, sticky='sw', padx=2, pady=(2, 1))
+        # Create next button
         self.next_button = tk.Button(self.root, text='==>', command=self.player.next)
-        self.next_button.grid(row=3, column=6, sticky='nsew', padx=2, pady=2)
+        self.next_button.grid(row=2, column=6, sticky='se', padx=(0, 16), pady=(2, 1))
 
     # Disable slider updates while scrubbing
     def cancel_job(self, event=None):
