@@ -22,14 +22,13 @@ class Player:
 
     def open(self, uri):
         media = None
-        title = None
         if uri.startswith('http'):
             # Get raw audio URL and metadata with yt-dlp. May not work if YouTube breaks something.
             self.ydl_url = uri
             song_info = self.ydl.extract_info(uri, download=False)
             if song_info:
                 media = self.instance.media_new(song_info['url'])
-                title = song_info['title']
+                media.set_meta(vlc.Meta.Title, song_info['title'])
         else:
             # Parse metadata
             media = self.instance.media_new(uri)
@@ -40,7 +39,6 @@ class Player:
         mlist.add_media(media)
         self.mlistplayer.set_media_list(mlist)
         self.mlistplayer.play_item(media)
-        return title
 
     def pause(self):
         self.mplayer.pause()
@@ -132,7 +130,7 @@ class PlayerGui:
             self.open_media(file_path)
 
     def open_media(self, url):
-        title = self.player.open(url)
+        self.player.open(url)
         # Fix volume not applying on media start
         self.player.set_volume(self.volume_slider.get())
 
