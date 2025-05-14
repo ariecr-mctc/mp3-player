@@ -71,7 +71,7 @@ class Player:
                     }],
                     'overwrites': True,
                     # Output template
-                    'outtmpl': f'{path}.%(ext)s'}
+                    'outtmpl': f'{path}/%(uploader)s - %(title)s.%(ext)s'}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download(self.ydl_url)
 
