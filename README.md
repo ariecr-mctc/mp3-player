@@ -23,12 +23,10 @@ Run mp3-player.py
 TODO
 --------------
 - Open filename given as an arg on cmdline
-- Add playlist support
 
 Stretch Goals
 --------------
 - Add album art preview
-- Add m3u8 playlist support
 
 Credits
 --------------

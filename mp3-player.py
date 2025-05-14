@@ -62,15 +62,23 @@ class Player:
 
     def save(self, path):
         ydl_opts = {'format': 'bestaudio',
-                    # Embed metadata
                     'postprocessors': [{
+                    # Embed metadata
                         'key': 'FFmpegMetadata',
                         'add_chapters': True,
                         'add_metadata': True,
                         'add_infojson': 'if_exists'
                     }, {
                         'key': 'SavePlaylist'
-                    }],
+                    }, {
+                    # Remove characters from file name that VLC doesn't like
+                        'actions': [(yt_dlp.postprocessor.metadataparser.MetadataParserPP.replacer,
+                            'title',
+                            '#',
+                            '_')],
+                        'key': 'MetadataParser',
+                        'when': 'pre_process'},
+                    ],
                     'overwrites': True,
                     # Output template
                     'outtmpl': f'{path}/%(uploader)s - %(title)s.%(ext)s'}
