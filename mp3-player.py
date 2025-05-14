@@ -46,9 +46,8 @@ class Player:
                     media.set_meta(vlc.Meta.Title, yt_info['title'])
                     mlist.add_media(media)
         else:
-            # Parse metadata
+            # Add media to media list
             media = self.instance.media_new(uri)
-            vlc.libvlc_media_parse_with_options(media, vlc.MediaParseFlag(network=True), 5000)
             mlist.add_media(media)
         # Play the media with VLC
         self.mlistplayer.set_media_list(mlist)
