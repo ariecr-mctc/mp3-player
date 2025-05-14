@@ -60,7 +60,7 @@ class Player:
         self.mlistplayer.previous()
 
     def save(self, path):
-        ydl_opts = {'format': 'bestaudio',
+        ydl_opts = {'format': 'bestaudio', 'windowsfilenames': 'true',
                     'postprocessors': [{
                     # Embed metadata
                         'key': 'FFmpegMetadata',
