@@ -21,30 +21,31 @@ class Player:
         return self.mplayer.get_position()
 
     def open(self, uri):
-        media = None
+        mlist = self.instance.media_list_new()
         if uri.startswith('http'):
             # Get raw audio URL and metadata with yt-dlp. May not work if YouTube breaks something.
             self.ydl_url = uri
-            song_info = self.ydl.extract_info(uri, download=False)
-            if song_info:
-                media = self.instance.media_new(song_info['url'])
-                media.set_meta(vlc.Meta.Title, song_info['title'])
+            yt_info = self.ydl.extract_info(uri, download=False)
+            if yt_info:
+                try:  # Try extracting playlist
+                    songs = yt_info['entries']
+                except KeyError:  # Single song
+                    songs = [yt_info]
+                for song in songs:
+                    media = self.instance.media_new(song['url'])
+                    media.set_meta(vlc.Meta.Title, song['title'])
+                    mlist.add_media(media)
         else:
             # Parse metadata
             media = self.instance.media_new(uri)
             vlc.libvlc_media_parse_with_options(media, vlc.MediaParseFlag(network=True), 5000)
-            title = media.get_meta(vlc.Meta.Title)
-        # Create MediaList and play the media with VLC
-        mlist = self.instance.media_list_new()
-        mlist.add_media(media)
+            mlist.add_media(media)
+        # Play the media with VLC
         self.mlistplayer.set_media_list(mlist)
-        self.mlistplayer.play_item(media)
+        self.mlistplayer.play()
 
     def pause(self):
         self.mplayer.pause()
-
-    def play(self):
-        self.mplayer.play()
 
     def save(self, path):
         ydl_opts = {'format': 'bestaudio',
@@ -62,7 +63,7 @@ class Player:
             ydl.download(self.ydl_url)
 
     def stop(self):
-        self.mplayer.stop()
+        self.mlistplayer.stop()
 
     def set_position(self, position):
         self.mplayer.set_position(position)
