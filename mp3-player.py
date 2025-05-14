@@ -68,6 +68,8 @@ class Player:
                         'add_chapters': True,
                         'add_metadata': True,
                         'add_infojson': 'if_exists'
+                    }, {
+                        'key': 'SavePlaylist'
                     }],
                     'overwrites': True,
                     # Output template
@@ -103,7 +105,7 @@ class PlayerGui:
         self.root = tk_root
         self.root.title('Audio Player')
         self.root.columnconfigure(3, weight=1)
-        self.root.minsize(600, 100)
+        self.root.minsize(750, 100)
         self.player = player
         self.player.events.event_attach(vlc.EventType.MediaPlayerEndReached, self.clear_current)
         self.player.events.event_attach(vlc.EventType.MediaPlayerPlaying, self.set_needs_update)
@@ -123,7 +125,7 @@ class PlayerGui:
         self.url_button = tk.Button(self.root, text='Open URL', command=self.open_url)
         self.url_button.grid(row=1, column=1, sticky='nsew', padx=2, pady=2)
         # Create save button
-        self.save_button = tk.Button(self.root, text='Save As', command=self.save_file)
+        self.save_button = tk.Button(self.root, text='Save As', command=self.save_media)
         self.save_button.grid(row=2, column=0, columnspan=2, sticky='ns', padx=2, pady=2)
         # Create volume slider
         self.volume_slider = tk.Scale(self.root, from_=100, to=0, orient='vertical', command=self.player.set_volume)
@@ -173,10 +175,11 @@ class PlayerGui:
             self.root.update()
             self.open_media(url)
 
-    def save_file(self):
-        file_path = tk.filedialog.asksaveasfilename()
-        save_thread = Thread(target=self.player.save, args=(file_path,))
-        save_thread.start()
+    def save_media(self):  # Save last opened YouTube link to directory
+        file_path = tk.filedialog.askdirectory()
+        if file_path:
+            save_thread = Thread(target=self.player.save, args=(file_path,))
+            save_thread.start()
 
     def set_needs_update(self, event=None):  # VLC event callback
         self.media_needs_update = True

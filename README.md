@@ -33,3 +33,4 @@ Stretch Goals
 Credits
 --------------
 https://codeloop.org/how-to-build-media-player-in-python-tkinter/
+https://gist.github.com/kl/a8c60b10f2a0b0e48d6a06b4540a0193
