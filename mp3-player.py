@@ -34,9 +34,6 @@ class Player:
             # Parse metadata
             media = self.instance.media_new(uri)
             vlc.libvlc_media_parse_with_options(media, vlc.MediaParseFlag(network=True), 5000)
-            # Above method is asynchronous, wait until done
-            while not vlc.libvlc_media_get_parsed_status(media):
-                continue
             title = media.get_meta(vlc.Meta.Title)
         # Create MediaList and play the media with VLC
         mlist = self.instance.media_list_new()
@@ -85,8 +82,10 @@ class PlayerGui:
         self.root.minsize(600, 100)
         self.player = player
         self.player.events.event_attach(vlc.EventType.MediaPlayerEndReached, self.clear_current)
-        # Update sliders
-        self.job = self.root.after(100, self.update_sliders)
+        self.player.events.event_attach(vlc.EventType.MediaPlayerPlaying, self.set_needs_update)
+        # Update media info
+        self.media_needs_update = False
+        self.job = self.root.after(100, self.update_media_info)
         # Create play/pause button
         self.play_button = tk.Button(self.root, text='Play/Pause', command=self.player.pause)
         self.play_button.grid(row=0, column=0, sticky='nsew', padx=2, pady=2)
@@ -124,7 +123,7 @@ class PlayerGui:
             self.root.after_cancel(self.job)
             self.job = None
 
-    def clear_current(self, event=None):
+    def clear_current(self, event=None):  # VLC event callback
         self.now_playing_text.set('Now Playing: N/A')
 
     def open_file(self):
@@ -136,11 +135,6 @@ class PlayerGui:
         title = self.player.open(url)
         # Fix volume not applying on media start
         self.player.set_volume(self.volume_slider.get())
-        # Set now playing text, or a fallback message in case of errors
-        if title is not None:
-            self.now_playing_text.set('Now Playing: ' + title)
-        else:
-            self.now_playing_text.set('Error: Media info not found.')
 
     def open_url(self):
         url = tk.simpledialog.askstring('Open URL', 'Enter the URL to play:')
@@ -156,17 +150,27 @@ class PlayerGui:
         save_thread = Thread(target=self.player.save, args=(file_path,))
         save_thread.start()
 
+    def set_needs_update(self, event=None):  # VLC event callback
+        self.media_needs_update = True
+
     def set_position(self, event=None):
         self.player.set_position(float(self.pos_slider.get()) / 100)
-        self.job = self.root.after(1000, self.update_sliders)  # Re-enable progress bar updates
+        self.job = self.root.after(1000, self.update_media_info)  # Re-enable progress bar updates
 
     def stop(self):
         self.player.stop()
         self.clear_current()
 
-    def update_sliders(self):
+    def update_media_info(self):
         self.pos_slider.set(self.player.get_position() * 100)
-        self.job = self.root.after(1000, self.update_sliders)
+        if self.media_needs_update:  # VLC callbacks are not reentrant
+            title = self.player.mplayer.get_media().get_meta(vlc.Meta.Title)
+            if title is not None:  # Set now playing text, or a fallback message in case of errors
+                self.now_playing_text.set('Now Playing: ' + title)
+            else:
+                self.now_playing_text.set('Error: Media info not found.')
+            self.media_needs_update = False
+        self.job = self.root.after(200, self.update_media_info)
 
 
 if __name__ == '__main__':
