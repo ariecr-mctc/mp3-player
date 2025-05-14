@@ -22,6 +22,9 @@ class Player:
     def get_position(self):
         return self.mplayer.get_position()
 
+    def next(self):
+        self.mlistplayer.next()
+
     def open(self, uri):
         mlist = self.instance.media_list_new()
         if uri.startswith('http'):
@@ -53,6 +56,9 @@ class Player:
 
     def pause(self):
         self.mlistplayer.pause()
+
+    def prev(self):
+        self.mlistplayer.previous()
 
     def save(self, path):
         ydl_opts = {'format': 'bestaudio',
@@ -128,12 +134,16 @@ class PlayerGui:
         # Create media display
         self.now_playing_text = tk.StringVar(value='Now Playing: N/A')
         self.now_playing = tk.Label(self.root, textvariable=self.now_playing_text)
-        self.now_playing.grid(row=1, column=3, sticky='nsew')
+        self.now_playing.grid(row=1, column=3, columnspan=4, sticky='nsew')
         # Create position slider
         self.pos_slider = tk.Scale(self.root, from_=0, to=100, orient='horizontal', showvalue=False)
         self.pos_slider.bind('<ButtonPress-1>', self.cancel_job)  # Avoid slider position updating while scrubbing
         self.pos_slider.bind('<ButtonRelease-1>', self.set_position)  # Avoid constant audio clipping when scrubbing
-        self.pos_slider.grid(row=2, column=3, sticky='nsew', padx=10)
+        self.pos_slider.grid(row=2, column=3, columnspan=4, sticky='nsew', padx=10)
+        self.prev_button = tk.Button(self.root, text='<==', command=self.player.prev)
+        self.prev_button.grid(row=3, column=3, sticky='nsw', padx=2, pady=2)
+        self.next_button = tk.Button(self.root, text='==>', command=self.player.next)
+        self.next_button.grid(row=3, column=6, sticky='nsew', padx=2, pady=2)
 
     # Disable slider updates while scrubbing
     def cancel_job(self, event=None):
